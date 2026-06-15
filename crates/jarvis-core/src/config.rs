@@ -17,9 +17,7 @@ use rustpotter::{
     RustpotterConfig, ScoreMode,
 };
 
-use crate::IntentRecognitionEngine;
 use crate::config::structs::NoiseSuppressionBackend;
-use crate::config::structs::VadBackend;
 use crate::{APP_CONFIG_DIR, APP_DIRS, APP_LOG_DIR};
 
 #[allow(dead_code)]
@@ -67,8 +65,12 @@ pub fn init_dirs() -> Result<(), String> {
 pub const DEFAULT_AUDIO_TYPE: AudioType = AudioType::Kira;
 pub const DEFAULT_RECORDER_TYPE: RecorderType = RecorderType::PvRecorder;
 pub const DEFAULT_WAKE_WORD_ENGINE: WakeWordEngine = WakeWordEngine::Vosk;
-pub const DEFAULT_INTENT_RECOGNITION_ENGINE: IntentRecognitionEngine = IntentRecognitionEngine::IntentClassifier;
 pub const DEFAULT_SPEECH_TO_TEXT_ENGINE: SpeechToTextEngine = SpeechToTextEngine::Vosk;
+
+// backend defaults (string IDs)
+pub const DEFAULT_INTENT_BACKEND: &str = "intent-classifier";
+pub const DEFAULT_SLOTS_BACKEND: &str = "none";
+pub const DEFAULT_VAD_BACKEND: &str = "energy";
 
 pub const DEFAULT_VOICE: &str = "jarvis-remaster";
 pub const SOUND_PATH: &str = "resources/sound"; // extended from SOUND_DIR (resources/sound)
@@ -157,9 +159,11 @@ pub const VOSK_SPEECH_PARTIAL_WORDS: bool = false;
 pub const INTENT_CLASSIFIER_MIN_CONFIDENCE: f64 = 0.75;
 
 
+// embedding classifier
+pub const EMBEDDING_MIN_CONFIDENCE: f64 = 0.70;
+
 // AUDIO PROCESSING DEFAULTS
 pub const DEFAULT_NOISE_SUPPRESSION: NoiseSuppressionBackend = NoiseSuppressionBackend::None;
-pub const DEFAULT_VAD: VadBackend = VadBackend::Energy;
 pub const DEFAULT_GAIN_NORMALIZER: bool = false;
 
 // VAD settings
@@ -175,9 +179,12 @@ pub const GAIN_MAX: f32 = 3.0;  // maximum gain multiplier
 // nnnoiseless frame size (fixed by library)
 pub const NNNOISELESS_FRAME_SIZE: usize = 480;
 
+// LUA
+pub const DEFAULT_LUA_SANDBOX: &str = "standard";
+pub const DEFAULT_LUA_TIMEOUT: u64 = 10000; // ms
 
 // ETC
-pub const CMD_RATIO_THRESHOLD: f64 = 65f64;
+pub const CMD_RATIO_THRESHOLD: f64 = 75f64;
 pub const CMS_WAIT_DELAY: std::time::Duration = std::time::Duration::from_secs(15);
 
 // pub const ASSISTANT_GREET_PHRASES: [&str; 3] = ["greet1", "greet2", "greet3"];
@@ -203,29 +210,30 @@ pub const CMS_WAIT_DELAY: std::time::Duration = std::time::Duration::from_secs(1
 
 
 
-pub fn get_wake_phrase(lang: &str) -> &'static str {
+pub fn get_wake_phrases(lang: &str) -> &'static [&'static str] {
     match lang {
-        "ru" => "джарвис",
-        "ua" => "джарвіс", 
-        "en" => "jarvis",
-        _ => "jarvis",
+        "ru" => &["джарвис", "джервис", "гарвис", "джарви", "гарви"],
+        "ua" => &["джарвіс", "джервіс"],
+        "en" => &["jarvis", "jervis"],
+        _ => &["jarvis"],
     }
 }
 
 pub fn get_phrases_to_remove(lang: &str) -> &'static [&'static str] {
     match lang {
         "ru" => &[
-            "джарвис", "сэр", "слушаю сэр", "всегда к услугам",
+            "джарвис", "джервис", "гарвис", "джарви", "гарви",
+            "сэр", "слушаю сэр", "всегда к услугам",
             "произнеси", "ответь", "покажи", "скажи", "давай",
             "да сэр", "к вашим услугам сэр", "загружаю сэр",
         ],
         "ua" => &[
-            "джарвіс", "сер", "слухаю сер", "завжди до послуг",
+            "джарвіс", "джервіс", "сер", "слухаю сер", "завжди до послуг",
             "скажи", "покажи", "відповідай", "давай",
             "так сер", "до ваших послуг сер",
         ],
         "en" => &[
-            "jarvis", "sir", "yes sir", "at your service",
+            "jarvis", "jervis", "sir", "yes sir", "at your service",
             "please", "say", "show", "tell", "hey",
         ],
         _ => &["jarvis"],

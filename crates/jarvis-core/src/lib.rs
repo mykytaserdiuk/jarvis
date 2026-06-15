@@ -26,7 +26,14 @@ pub mod stt;
 #[cfg(feature = "intent")]
 pub mod intent;
 
-pub mod vosk_models;
+#[cfg(feature = "jarvis_app")]
+pub mod slots;
+
+pub mod models;
+
+// re-exported from models/
+pub use models::vosk_models;
+pub use models::gliner_models;
 
 #[cfg(feature = "jarvis_app")]
 pub mod audio_processing;
@@ -37,6 +44,9 @@ pub mod ipc;
 pub mod voices;
 
 pub mod audio_buffer;
+
+#[cfg(feature = "lua")]
+pub mod lua;
 
 // shared statics
 // pub static APP_DIR: Lazy<PathBuf> = Lazy::new(|| std::env::current_dir().unwrap());
@@ -57,5 +67,6 @@ pub static COMMANDS_LIST: OnceCell<Vec<JCommandsList>> = OnceCell::new();
 pub use commands::JCommandsList;
 pub use config::structs::*;
 pub use db::structs::Settings;
+pub use db::SettingsManager;
 
 // use crate::commands::{JComandsList, JCommand};

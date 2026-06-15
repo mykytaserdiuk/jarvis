@@ -7,6 +7,12 @@ tray-restart = Restart
 tray-settings = Settings
 tray-exit = Exit
 tray-tooltip = JARVIS - Voice Assistant
+tray-language = Language
+tray-voice = Voice
+tray-wake-word = Wake Word Engine
+tray-noise-suppression = Noise Suppression
+tray-vad = Voice Activity Detection
+tray-gain-normalizer = Gain Normalizer
 
 # ### HEADER
 header-commands = COMMANDS
@@ -121,6 +127,15 @@ notification-saved = Settings saved!
 notification-error = Error
 notification-assistant-started = Assistant started
 notification-assistant-stopped = Assistant stopped
+
+# SLOTS EXTRACTION
+settings-slot-engine = Slot extraction
+settings-slot-engine-desc = Extract parameters from voice commands (e.g. city name, number).
+settings-gliner-model = GLiNER ONNX model
+settings-gliner-model-desc =
+    Select model variant.
+    Smaller quantized models (int8, uint8) are faster but less accurate.
+settings-gliner-models-hint = No GLiNER models found.
 
 # ETC
 search-error-not-running = Assistant is not running

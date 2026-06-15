@@ -15,25 +15,41 @@ pub struct JCommandsList {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JCommand {
     pub id: String,
-    pub action: String,
+
+    // Available command types are: "lua", "ahk", "cli", "voice", "terminate", "stop_chaining"
+    #[serde(rename = "type")]
+    pub cmd_type: String,
     
     #[serde(default)]
     pub description: String,
     
+    // for "ahk" type
     #[serde(default)]
     pub exe_path: String,
-    
     #[serde(default)]
     pub exe_args: Vec<String>,
     
+    // for "cli" type
     #[serde(default)]
     pub cli_cmd: String,
-    
     #[serde(default)]
     pub cli_args: Vec<String>,
     
     // #[serde(default)]
     // pub sounds: Vec<String>,
+
+    // for "lua" type
+    #[serde(default)]
+    pub script: String,
+
+    // Lua sandbox level: "minimal", "standard", "full"
+    // basically this is an access level
+    #[serde(default)]
+    pub sandbox: String,
+
+    // Script timeout in milliseconds (default 10000 = 10s)
+    #[serde(default)]
+    pub timeout: u64,
 
     // Multi-language sounds
     #[serde(default)]
@@ -43,6 +59,9 @@ pub struct JCommand {
     #[serde(default)]
     pub phrases: HashMap<String, Vec<String>>,
 
+    // Slot definitions: slot_name -> how to extract it
+    #[serde(default)]
+    pub slots: HashMap<String, SlotDefinition>,
 
     // CACHE
     #[serde(skip, default)]
@@ -57,14 +76,24 @@ impl Clone for JCommand {
     fn clone(&self) -> Self {
         Self {
             id: self.id.clone(),
-            action: self.action.clone(),
+
+            cmd_type: self.cmd_type.clone(),
             description: self.description.clone(),
+
             exe_path: self.exe_path.clone(),
             exe_args: self.exe_args.clone(),
+
             cli_cmd: self.cli_cmd.clone(),
             cli_args: self.cli_args.clone(),
+
+            script: self.script.clone(),
+            sandbox: self.sandbox.clone(),
+            timeout: self.timeout.clone(),
+
             sounds: self.sounds.clone(),
             phrases: self.phrases.clone(),
+
+            slots: self.slots.clone(),
 
             // empty caches for cloned instance
             sounds_cache: RwLock::new(HashMap::new()),
@@ -126,4 +155,25 @@ impl JCommand {
         // fallback to first available
         map.values().next().cloned().unwrap_or_default()
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SlotDefinition {
+    // Entity label for GLiNER (e.g. "city name", "song title", "number")
+    // This is a free-form description - GLiNER matches it semantically
+    #[serde(default)]
+    pub entity: String,
+
+    // Optional: fallback context words for template-based extraction
+    // e.g. ["in", "for", "at"] for a city slot
+    #[serde(default)]
+    pub context: Vec<String>,
+}
+
+// Extracted slot value passed to commands
+#[derive(Debug, Clone, Serialize)]
+#[serde(untagged)]
+pub enum SlotValue {
+    Text(String),
+    Number(f64),
 }
